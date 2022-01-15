@@ -364,22 +364,6 @@ void close(){
 int main( int argc, char* args[] )
 {
 	int page = 0;
-	srand(time(NULL));
-	std::vector<std::vector<int>> positionSequence(6,std::vector<int>(36,0));
-	std::vector<int> oneTo36(36,0);
-	for(int i = 0; i < 36; i++)
-		oneTo36[i] = i;
-	int index;
-    for(int i = 0; i < 6; i++){
-        std::vector<int> pickedIndex(36,0);
-        for(int j = 0; j < 36; j++){
-            do{
-                index = rand() % 36;
-            } while (pickedIndex[index] != 0);
-            pickedIndex[index] = 1;
-            positionSequence[i][j] = oneTo36[index]; 
-	    }
-	}
 	//Start up SDL and create window
 	if( !init() )
 	{
@@ -497,34 +481,35 @@ int main( int argc, char* args[] )
 				SDL_RenderClear( gRenderer );
 				switch (page){
 					case 0:
-					//Render text textures
-					titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
-					gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, titleTexture.getHeight() );
-					gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, titleTexture.getHeight()+gPromptTextTexture.getHeight() );
-					{// button
-					SDL_Rect bstart = {SCREEN_WIDTH*65/100, SCREEN_HEIGHT*7/10,150,50};
-					// fill
-					SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-					SDL_RenderFillRect( gRenderer, &bstart );
-					// outline
-					SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-					SDL_RenderDrawRect( gRenderer, &bstart );
-					
-					if (!startbutton.loadFromRenderedText( "Start", textColor, gFont)){// if text successfully loaded
-						SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
-						SDL_RenderFillRect( gRenderer, NULL );
-					}
-					startbutton.render(SCREEN_WIDTH*65/100+(150-startbutton.getWidth())/2, SCREEN_HEIGHT*7/10+(50-startbutton.getHeight())/2);
-					}
-					break;
-				case 1:
-					for (int i = 0; i < 6; i++){
+						//Render text textures
+						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
+						gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, titleTexture.getHeight() );
+						gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, titleTexture.getHeight()+gPromptTextTexture.getHeight() );
+						{// button
+						SDL_Rect bstart = {SCREEN_WIDTH*65/100, SCREEN_HEIGHT*7/10,150,50};
+						// fill
+						SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+						SDL_RenderFillRect( gRenderer, &bstart );
+						// outline
+						SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+						SDL_RenderDrawRect( gRenderer, &bstart );
+						
+						if (!startbutton.loadFromRenderedText( "Start", textColor, gFont)){// if text successfully loaded
+							SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+							SDL_RenderFillRect( gRenderer, NULL );
+						}
+						startbutton.render(SCREEN_WIDTH*65/100+(150-startbutton.getWidth())/2, SCREEN_HEIGHT*7/10+(50-startbutton.getHeight())/2);
+						}
+						break;
+					case 1:
+						for (int i = 0; i < 6; i++){
 							for (int j = 0; j < 6; j++){
 								testcard.scaledrender(SCREEN_WIDTH/2+(i-3)*30,j*40,0.25);
 							}
 						}
 						break;
-					}
+				}
+
 				//Update screen
 				SDL_RenderPresent( gRenderer );
 			}
