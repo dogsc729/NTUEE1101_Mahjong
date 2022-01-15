@@ -4,19 +4,81 @@
 #include "SDL_ttf.h"
 #include "stdio.h"
 #include "string"
+#include "vector"
+#include "stdlib.h"
+#include "iostream"
+#include "time.h"
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
 SDL_Window* gWindow = NULL;
-
+Uint16 pixels[64*64] = {
+	0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0aab, 0x0789, 0x0bcc, 0x0eee, 0x09aa, 0x099a, 0x0ddd,
+    0x0fff, 0x0eee, 0x0899, 0x0fff, 0x0fff, 0x1fff, 0x0dde, 0x0dee,
+    0x0fff, 0xabbc, 0xf779, 0x8cdd, 0x3fff, 0x9bbc, 0xaaab, 0x6fff,
+    0x0fff, 0x3fff, 0xbaab, 0x0fff, 0x0fff, 0x6689, 0x6fff, 0x0dee,
+    0xe678, 0xf134, 0x8abb, 0xf235, 0xf678, 0xf013, 0xf568, 0xf001,
+    0xd889, 0x7abc, 0xf001, 0x0fff, 0x0fff, 0x0bcc, 0x9124, 0x5fff,
+    0xf124, 0xf356, 0x3eee, 0x0fff, 0x7bbc, 0xf124, 0x0789, 0x2fff,
+    0xf002, 0xd789, 0xf024, 0x0fff, 0x0fff, 0x0002, 0x0134, 0xd79a,
+    0x1fff, 0xf023, 0xf000, 0xf124, 0xc99a, 0xf024, 0x0567, 0x0fff,
+    0xf002, 0xe678, 0xf013, 0x0fff, 0x0ddd, 0x0fff, 0x0fff, 0xb689,
+    0x8abb, 0x0fff, 0x0fff, 0xf001, 0xf235, 0xf013, 0x0fff, 0xd789,
+    0xf002, 0x9899, 0xf001, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0xe789,
+    0xf023, 0xf000, 0xf001, 0xe456, 0x8bcc, 0xf013, 0xf002, 0xf012,
+    0x1767, 0x5aaa, 0xf013, 0xf001, 0xf000, 0x0fff, 0x7fff, 0xf124,
+    0x0fff, 0x089a, 0x0578, 0x0fff, 0x089a, 0x0013, 0x0245, 0x0eff,
+    0x0223, 0x0dde, 0x0135, 0x0789, 0x0ddd, 0xbbbc, 0xf346, 0x0467,
+    0x0fff, 0x4eee, 0x3ddd, 0x0edd, 0x0dee, 0x0fff, 0x0fff, 0x0dee,
+    0x0def, 0x08ab, 0x0fff, 0x7fff, 0xfabc, 0xf356, 0x0457, 0x0467,
+    0x0fff, 0x0bcd, 0x4bde, 0x9bcc, 0x8dee, 0x8eff, 0x8fff, 0x9fff,
+    0xadee, 0xeccd, 0xf689, 0xc357, 0x2356, 0x0356, 0x0467, 0x0467,
+    0x0fff, 0x0ccd, 0x0bdd, 0x0cdd, 0x0aaa, 0x2234, 0x4135, 0x4346,
+    0x5356, 0x2246, 0x0346, 0x0356, 0x0467, 0x0356, 0x0467, 0x0467,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
+    0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff
+};
+SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(pixels,16,16,16,16*2,0x0f00,0x00f0,0x000f,0xf000);
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
 
 //Globally used font
 TTF_Font* gFont = NULL;
 TTF_Font* titleFont = NULL;
+
+std::vector<std::vector<int>> bingoBoard(){
+	std::vector<std::vector<int>> positionSequence(6,std::vector<int>(36,0));
+	std::vector<int> pickedIndex(36,0);
+	std::vector<int> oneTo36(36,0);
+	for(int i = 0; i < 6; i++){
+		for(int j = 0; j < 36; j++)
+			oneTo36[j] = j;
+		int size = 36;
+		int index;
+		for(int j = 0; j < 36; j++){
+			do{
+				index = rand() % 36;
+			} while (pickedIndex[index] != 0);
+			pickedIndex[index] = 1;
+			positionSequence[i][j] = oneTo36[index]; 
+		}
+	}
+	for(int i = 0; i < 6; i++){
+		for(int j = 0; j < 36; j++)
+			std::cout << positionSequence[i][j] << " ";
+	}
+	return positionSequence;
+};
 
 class LTexture
 {
@@ -187,23 +249,21 @@ bool init(){
 	bool success = true;
 
 	//Initialize SDL
-	if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-	{
+	if( SDL_Init( SDL_INIT_VIDEO ) < 0 ){
 		printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
 		success = false;
 	}
-	else
-	{
+	else{
 		//Set texture filtering to linear
-		if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
-		{
+		if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) ){
 			printf( "Warning: Linear texture filtering not enabled!" );
 		}
 
 		//Create window
 		gWindow = SDL_CreateWindow( "Mahjong", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
-		if( gWindow == NULL )
-		{
+		SDL_SetWindowIcon(gWindow, surface);
+		SDL_FreeSurface(surface);
+		if( gWindow == NULL ){
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
 			success = false;
 		}
@@ -248,8 +308,8 @@ bool loginPage(){
 	bool success = true;
 
 	//Open the font
-	gFont = TTF_OpenFont( "../font/Caviar_Dreams_Bold.ttf", 28 );
-    titleFont = TTF_OpenFont( "../font/Caviar_Dreams_Bold.ttf", 40 );
+	gFont = TTF_OpenFont( "font/Caviar_Dreams_Bold.ttf", 28 );
+    titleFont = TTF_OpenFont( "font/Caviar_Dreams_Bold.ttf", 40 );
 	if( gFont == NULL ){
 		printf( "Failed to load  gfont! SDL_ttf Error: %s\n", TTF_GetError() );
 		success = false;
@@ -297,6 +357,22 @@ void close(){
 
 int main( int argc, char* args[] )
 {
+	srand(time(NULL));
+	std::vector<std::vector<int>> positionSequence(6,std::vector<int>(36,0));
+	std::vector<int> oneTo36(36,0);
+	for(int i = 0; i < 36; i++)
+		oneTo36[i] = i;
+	int index;
+    for(int i = 0; i < 6; i++){
+        std::vector<int> pickedIndex(36,0);
+        for(int j = 0; j < 36; j++){
+            do{
+                index = rand() % 36;
+            } while (pickedIndex[index] != 0);
+            pickedIndex[index] = 1;
+            positionSequence[i][j] = oneTo36[index]; 
+	    }
+	}
 	//Start up SDL and create window
 	if( !init() )
 	{
@@ -328,7 +404,6 @@ int main( int argc, char* args[] )
 			//The current input text.
 			std::string inputText = "Some text";
 			gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor ,gFont);
-
 			//Enable text input
 			SDL_StartTextInput();
 			//While application is running
