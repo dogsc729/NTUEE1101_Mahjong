@@ -166,7 +166,7 @@ class LTexture
 LTexture titleTexture;
 LTexture gPromptTextTexture;
 LTexture gInputTextTexture;
-
+LTexture startbutton;
 //user info
 class User{
     public:
@@ -248,8 +248,8 @@ bool loginPage(){
 	bool success = true;
 
 	//Open the font
-	gFont = TTF_OpenFont( "font/Caviar_Dreams_Bold.ttf", 28 );
-    titleFont = TTF_OpenFont( "font/Caviar_Dreams_Bold.ttf", 40 );
+	gFont = TTF_OpenFont( "../font/Caviar_Dreams_Bold.ttf", 28 );
+    titleFont = TTF_OpenFont( "../font/Caviar_Dreams_Bold.ttf", 40 );
 	if( gFont == NULL ){
 		printf( "Failed to load  gfont! SDL_ttf Error: %s\n", TTF_GetError() );
 		success = false;
@@ -316,6 +316,9 @@ int main( int argc, char* args[] )
 			//Main loop flag
 			bool quit = false;
 
+			// mouse position
+			int mx, my;
+
 			//Event handler
 			SDL_Event e;
 
@@ -323,12 +326,11 @@ int main( int argc, char* args[] )
 			SDL_Color textColor = { 0, 0, 0, 0xFF };
 
 			//The current input text.
-			std::string inputText = "";
+			std::string inputText = "Some text";
 			gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor ,gFont);
 
 			//Enable text input
 			SDL_StartTextInput();
-
 			//While application is running
 			while( !quit )
 			{
@@ -342,6 +344,18 @@ int main( int argc, char* args[] )
 					if( e.type == SDL_QUIT )
 					{
 						quit = true;
+					}
+					if (e.type == SDL_MOUSEMOTION){
+						SDL_GetMouseState(&mx, &my);
+					}
+					if (e.type == SDL_MOUSEBUTTONDOWN)
+					{
+						if (e.button.button == SDL_BUTTON_LEFT){// left click
+							if (mx >= SCREEN_WIDTH*65/100 && mx <= SCREEN_WIDTH*65/100+150 
+							 && my >= SCREEN_HEIGHT*7/10 && my <= SCREEN_HEIGHT*7/10+50){
+								quit = true;// change this!!!!
+							}
+						}
 					}
 					//Special key input
 					else if( e.type == SDL_KEYDOWN )
@@ -403,7 +417,21 @@ int main( int argc, char* args[] )
                 titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
 				gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, titleTexture.getHeight() );
 				gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, titleTexture.getHeight()+gPromptTextTexture.getHeight() );
-
+				{// button
+				SDL_Rect bstart = {SCREEN_WIDTH*65/100, SCREEN_HEIGHT*7/10,150,50};
+				// fill
+				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+				SDL_RenderFillRect( gRenderer, &bstart );
+				// outline
+				SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+				SDL_RenderDrawRect( gRenderer, &bstart );
+				
+				if (!startbutton.loadFromRenderedText( "Start", textColor, gFont)){// if text successfully loaded
+					SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+					SDL_RenderFillRect( gRenderer, NULL );
+				}
+				startbutton.render(SCREEN_WIDTH*65/100+(150-startbutton.getWidth())/2, SCREEN_HEIGHT*7/10+(50-startbutton.getHeight())/2);
+				}
 				//Update screen
 				SDL_RenderPresent( gRenderer );
 			}
