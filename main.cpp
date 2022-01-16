@@ -363,8 +363,8 @@ void close(){
 };
 
 void loadcards(){
-	cards[0].loadFromFile("./majhongcard/tiao/onetiao.png");
-	cards[1].loadFromFile("./majhongcard/tiao/twotiao.png");
+	cards[0].loadFromFile("majhongcard/tiao/onetiao.png");
+	cards[1].loadFromFile("majhongcard/tiao/twotiao.png");
 	cards[2].loadFromFile("majhongcard/tiao/threetiao.png");
 	cards[3].loadFromFile("majhongcard/tiao/fourtiao.png");
 	cards[4].loadFromFile("majhongcard/tiao/fivetiao.png");
@@ -406,6 +406,7 @@ int main( int argc, char* args[] )
 {
 	int page = 0;
 	SDL_Rect bstart,bnext;
+	SDL_Rect bingooutline[6];
 	srand(time(NULL));
 	std::vector<std::vector<int>> positionSequence(6,std::vector<int>(36,0));
 	std::vector<int> oneTo36(36,0);
@@ -420,7 +421,7 @@ int main( int argc, char* args[] )
             } while (pickedIndex[index] != 0);
             pickedIndex[index] = 1;
             positionSequence[i][j] = oneTo36[index]; 
-			std::cout << positionSequence[i][j] << " ";
+			// std::cout << positionSequence[i][j] << " ";
 	    }
 	}
 	//Start up SDL and create window
@@ -442,7 +443,7 @@ int main( int argc, char* args[] )
 		{	
 			//Main loop flag
 			bool quit = false;
-
+			int boardselected = -1;
 			// mouse position
 			int mx, my;
 
@@ -481,9 +482,16 @@ int main( int argc, char* args[] )
 							 && my >= bstart.y && my <= bstart.y+bstart.h){
 								page = 1;// change this!!!!
 							}
+							for (int i = 0; i < 6; i++){// select bingo board
+								if (mx >= bingooutline[i].x && mx <= bingooutline[i].x+bingooutline[i].w 
+							 	  && my >= bingooutline[i].y && my <= bingooutline[i].y+bingooutline[i].h){
+									boardselected = i;
+								}
+							}
 							if (mx >= bnext.x && mx <= bnext.x+bnext.w 
 							 && my >= bnext.y && my <= bnext.y+bnext.h){
-								page = 2;
+								if (boardselected != -1)
+									page = 2;
 							}
 						}
 					}
@@ -543,7 +551,7 @@ int main( int argc, char* args[] )
 				SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
 				SDL_RenderClear( gRenderer );
 				switch (page){
-					case 0:
+					case 0://page 1
 						//Render text textures
 						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
 						gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, titleTexture.getHeight() );
@@ -564,25 +572,31 @@ int main( int argc, char* args[] )
 						startbutton.render(bstart.x+(bstart.w-startbutton.getWidth())/2, bstart.y+(bstart.h-startbutton.getHeight())/2);
 						}
 						break;
-					case 1:
+					case 1://page 2
 						titleTexture.loadFromRenderedText( "Choose Your Bingo Board", textColor ,gFont);
 						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
 						for (int i = 0; i < 6; i++){
-							SDL_Rect bingooutline;
-							if (i <= 2) { bingooutline= {(SCREEN_WIDTH-200)/3*(i%3)+20, titleTexture.getHeight()+30, 300, 300};}
-							else bingooutline = {(SCREEN_WIDTH-200)/3*(i%3)+20, 350+titleTexture.getHeight(), 300, 300};
-							SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-							SDL_RenderDrawRect( gRenderer, &bingooutline);
-							for (int j = 0; j < 36; j++){
-								cards[positionSequence[i][j]].scaledrender(bingooutline.x+bingooutline.w/2+40*(j%6-3),bingooutline.y+bingooutline.h/2+45*(j/6-3),0.25);
-							}
-							bnext = {SCREEN_WIDTH*85/100, SCREEN_HEIGHT*8/10, 150, 50};
-							SDL_RenderDrawRect( gRenderer, &bnext);
-							if (!nextbutton.loadFromRenderedText( "Next", textColor, gFont)){// if text successfully loaded
+							if (i <= 2) { bingooutline[i]= {(SCREEN_WIDTH-200)/3*(i%3)+20, titleTexture.getHeight()+30, 300, 300};}
+							else bingooutline[i] = {(SCREEN_WIDTH-200)/3*(i%3)+20, 350+titleTexture.getHeight(), 300, 300};
+							if (boardselected == i){// selected board change outline color
 								SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
-								SDL_RenderFillRect( gRenderer, NULL );
 							}
-							nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
+							else
+								SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+							SDL_RenderDrawRect( gRenderer, &bingooutline[i]);
+							for (int j = 0; j < 36; j++){
+								cards[positionSequence[i][j]].scaledrender(bingooutline[i].x+bingooutline[i].w/2+40*(j%6-3),bingooutline[i].y+bingooutline[i].h/2+45*(j/6-3),0.25);
+							}
+							if (boardselected != -1){// if selected show next button
+								bnext = {SCREEN_WIDTH*85/100, SCREEN_HEIGHT*8/10, 150, 50};
+								SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+								SDL_RenderDrawRect( gRenderer, &bnext);
+								if (!nextbutton.loadFromRenderedText( "Next", textColor, gFont)){// if text successfully loaded
+									SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+									SDL_RenderFillRect( gRenderer, NULL );
+								}
+								nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
+							}
 						}
 						break;
 				}
