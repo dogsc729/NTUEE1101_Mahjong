@@ -234,7 +234,8 @@ LTexture titleTexture;
 LTexture gPromptTextTexture;
 LTexture gInputTextTexture;
 LTexture startbutton;
-LTexture testcard;
+LTexture nextbutton;
+LTexture cards[37];
 //user info
 class User{
     public:
@@ -361,9 +362,50 @@ void close(){
 	SDL_Quit();
 };
 
+void loadcards(){
+	cards[0].loadFromFile("./majhongcard/tiao/onetiao.png");
+	cards[1].loadFromFile("./majhongcard/tiao/twotiao.png");
+	cards[2].loadFromFile("majhongcard/tiao/threetiao.png");
+	cards[3].loadFromFile("majhongcard/tiao/fourtiao.png");
+	cards[4].loadFromFile("majhongcard/tiao/fivetiao.png");
+	cards[5].loadFromFile("majhongcard/tiao/sixtiao.png");
+	cards[6].loadFromFile("majhongcard/tiao/seventiao.png");
+	cards[7].loadFromFile("majhongcard/tiao/eighttiao.png");
+	cards[8].loadFromFile("majhongcard/tiao/ninetiao.png");
+	cards[9].loadFromFile("majhongcard/tong/onetong.png");
+	cards[10].loadFromFile("majhongcard/tong/twotong.png");
+	cards[11].loadFromFile("majhongcard/tong/threetong.png");
+	cards[12].loadFromFile("majhongcard/tong/fourtong.png");
+	cards[13].loadFromFile("majhongcard/tong/fivetong.png");
+	cards[14].loadFromFile("majhongcard/tong/sixtong.png");
+	cards[15].loadFromFile("majhongcard/tong/seventong.png");
+	cards[16].loadFromFile("majhongcard/tong/eighttong.png");
+	cards[17].loadFromFile("majhongcard/tong/ninetong.png");
+	cards[18].loadFromFile("majhongcard/wan/onewan.png");
+	cards[19].loadFromFile("majhongcard/wan/twowan.png");
+	cards[20].loadFromFile("majhongcard/wan/threewan.png");
+	cards[21].loadFromFile("majhongcard/wan/fourwan.png");
+	cards[22].loadFromFile("majhongcard/wan/fivewan.png");
+	cards[23].loadFromFile("majhongcard/wan/sixwan.png");
+	cards[24].loadFromFile("majhongcard/wan/sevenwan.png");
+	cards[25].loadFromFile("majhongcard/wan/eightwan.png");
+	cards[26].loadFromFile("majhongcard/wan/ninewan.png");
+	cards[27].loadFromFile("majhongcard/word/dong.png");
+	cards[28].loadFromFile("majhongcard/word/xi.png");
+	cards[29].loadFromFile("majhongcard/word/nan.png");
+	cards[30].loadFromFile("majhongcard/word/bei.png");
+	cards[31].loadFromFile("majhongcard/word/zhong.png");
+	cards[32].loadFromFile("majhongcard/word/fa.png");
+	cards[33].loadFromFile("majhongcard/word/baiban.png");
+	cards[34].loadFromFile("majhongcard/flower/flower_1.png");
+	cards[35].loadFromFile("majhongcard/flower/flower_2.png");
+	cards[36].loadFromFile("majhongcard/back.png");
+}
+
 int main( int argc, char* args[] )
 {
 	int page = 0;
+	SDL_Rect bstart,bnext;
 	srand(time(NULL));
 	std::vector<std::vector<int>> positionSequence(6,std::vector<int>(36,0));
 	std::vector<int> oneTo36(36,0);
@@ -378,6 +420,7 @@ int main( int argc, char* args[] )
             } while (pickedIndex[index] != 0);
             pickedIndex[index] = 1;
             positionSequence[i][j] = oneTo36[index]; 
+			std::cout << positionSequence[i][j] << " ";
 	    }
 	}
 	//Start up SDL and create window
@@ -390,7 +433,7 @@ int main( int argc, char* args[] )
         //create user object
         User player;
 		//Load media
-		testcard.loadFromFile("majhongcard/tiao/onetiao.png");
+		loadcards();
 		if( !loginPage() )
 		{
 			printf( "Failed to load media!\n" );
@@ -410,7 +453,7 @@ int main( int argc, char* args[] )
 			SDL_Color textColor = { 0, 0, 0, 0xFF };
 
 			//The current input text.
-			std::string inputText = "Some text";
+			std::string inputText = "";
 			gInputTextTexture.loadFromRenderedText( inputText.c_str(), textColor ,gFont);
 			//Enable text input
 			SDL_StartTextInput();
@@ -434,9 +477,13 @@ int main( int argc, char* args[] )
 					if (e.type == SDL_MOUSEBUTTONDOWN)
 					{
 						if (e.button.button == SDL_BUTTON_LEFT){// left click
-							if (mx >= SCREEN_WIDTH*65/100 && mx <= SCREEN_WIDTH*65/100+150 
-							 && my >= SCREEN_HEIGHT*7/10 && my <= SCREEN_HEIGHT*7/10+50){
+							if (mx >= bstart.x && mx <= bstart.x+bstart.w 
+							 && my >= bstart.y && my <= bstart.y+bstart.h){
 								page = 1;// change this!!!!
+							}
+							if (mx >= bnext.x && mx <= bnext.x+bnext.w 
+							 && my >= bnext.y && my <= bnext.y+bnext.h){
+								page = 2;
 							}
 						}
 					}
@@ -497,34 +544,48 @@ int main( int argc, char* args[] )
 				SDL_RenderClear( gRenderer );
 				switch (page){
 					case 0:
-					//Render text textures
-					titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
-					gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, titleTexture.getHeight() );
-					gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, titleTexture.getHeight()+gPromptTextTexture.getHeight() );
-					{// button
-					SDL_Rect bstart = {SCREEN_WIDTH*65/100, SCREEN_HEIGHT*7/10,150,50};
-					// fill
-					SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
-					SDL_RenderFillRect( gRenderer, &bstart );
-					// outline
-					SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
-					SDL_RenderDrawRect( gRenderer, &bstart );
-					
-					if (!startbutton.loadFromRenderedText( "Start", textColor, gFont)){// if text successfully loaded
-						SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
-						SDL_RenderFillRect( gRenderer, NULL );
-					}
-					startbutton.render(SCREEN_WIDTH*65/100+(150-startbutton.getWidth())/2, SCREEN_HEIGHT*7/10+(50-startbutton.getHeight())/2);
-					}
-					break;
-				case 1:
-					for (int i = 0; i < 6; i++){
-							for (int j = 0; j < 6; j++){
-								testcard.scaledrender(SCREEN_WIDTH/2+(i-3)*30,j*40,0.25);
-							}
+						//Render text textures
+						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
+						gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, titleTexture.getHeight() );
+						gInputTextTexture.render( ( SCREEN_WIDTH - gInputTextTexture.getWidth() ) / 2, titleTexture.getHeight()+gPromptTextTexture.getHeight() );
+						{// button
+						bstart = {SCREEN_WIDTH*8/10, SCREEN_HEIGHT*8/10,150,50};
+						// fill
+						SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
+						SDL_RenderFillRect( gRenderer, &bstart );
+						// outline
+						SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+						SDL_RenderDrawRect( gRenderer, &bstart );
+						
+						if (!startbutton.loadFromRenderedText( "Start", textColor, gFont)){// if text successfully loaded
+							SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+							SDL_RenderFillRect( gRenderer, NULL );
+						}
+						startbutton.render(bstart.x+(bstart.w-startbutton.getWidth())/2, bstart.y+(bstart.h-startbutton.getHeight())/2);
 						}
 						break;
-					}
+					case 1:
+						titleTexture.loadFromRenderedText( "Choose Your Bingo Board", textColor ,gFont);
+						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
+						for (int i = 0; i < 6; i++){
+							SDL_Rect bingooutline;
+							if (i <= 2) { bingooutline= {(SCREEN_WIDTH-200)/3*(i%3)+20, titleTexture.getHeight()+30, 300, 300};}
+							else bingooutline = {(SCREEN_WIDTH-200)/3*(i%3)+20, 350+titleTexture.getHeight(), 300, 300};
+							SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+							SDL_RenderDrawRect( gRenderer, &bingooutline);
+							for (int j = 0; j < 36; j++){
+								cards[positionSequence[i][j]].scaledrender(bingooutline.x+bingooutline.w/2+40*(j%6-3),bingooutline.y+bingooutline.h/2+45*(j/6-3),0.25);
+							}
+							bnext = {SCREEN_WIDTH*85/100, SCREEN_HEIGHT*8/10, 150, 50};
+							SDL_RenderDrawRect( gRenderer, &bnext);
+							if (!nextbutton.loadFromRenderedText( "Next", textColor, gFont)){// if text successfully loaded
+								SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+								SDL_RenderFillRect( gRenderer, NULL );
+							}
+							nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
+						}
+						break;
+				}
 				//Update screen
 				SDL_RenderPresent( gRenderer );
 			}
