@@ -404,7 +404,7 @@ void loadcards(){
 class selectcard// class contain selectcard's coord. and card type
 {
 	public:
-	selectcard():card(36),x(0),y(0){}
+	selectcard():card(36),x(-1),y(-1){}
 	~selectcard(){}
 	int getx(){return x;}
 	int gety(){return y;}
@@ -415,6 +415,38 @@ class selectcard// class contain selectcard's coord. and card type
 	private:
 	int x,y;
 };
+int bingo(std::vector<selectcard> card, std::vector<int> bingoboard){
+	int count = 0;
+	bool onboard[36] = {false};
+	for (int i = 0; i < 15; i++){
+		for (int j = 0; j < 36; j++){
+			if (card[i].card == bingoboard[j]){
+				onboard[j] = true;
+			}
+		}
+	}
+	for (int i = 0; i < 6; i++){
+		if (onboard[i*6] && onboard[i*6+1] && onboard[i*6+2] && onboard[i*6+3] && onboard[i*6+4] && onboard[i*6+5]){
+			std::cout << i << " row bingo" << std::endl;
+			count++;
+		}
+		if (onboard[i] && onboard[6+i] && onboard[6*2+i] && onboard[6*3+i] && onboard[6*4+i] && onboard[6*5+i]){
+			std::cout << i << " col bingo" << std::endl;
+			count++;
+		}
+	}
+	if (onboard[0] && onboard[7] && onboard[14] && onboard[21] && onboard[28] && onboard[35]){
+		std::cout << "\\ bingo" << std::endl;
+		count++;
+	}
+	if (onboard[5] && onboard[10] && onboard[15] && onboard[20] && onboard[25] && onboard[30]){
+		std::cout << "/ bingo" << std::endl;
+		count++;
+	}
+
+	std::cout << "bingo: " << count << std::endl;
+	return count;
+}
 int main( int argc, char* args[] )
 {
 	int page = 0;
@@ -435,13 +467,14 @@ int main( int argc, char* args[] )
             } while (pickedIndex[index] != 0);
             pickedIndex[index] = 1;
             positionSequence[i][j] = oneTo36[index]; 
-			// std::cout << positionSequence[i][j] << " ";
-	    }
+			std::cout << positionSequence[i][j] << " ";
+	    }std::cout << std::endl;
 	}
 	for (int i = 35; i > 0; i--){// random selectcard
 		index = rand() % 36;
-		std::swap(oneTo36[i],index);
+		std::swap(oneTo36[i],oneTo36[index]);
 	}
+	std::cout << "Selected cards: ";
 	for (int i = 0; i < 15; i++){
 		cardlist[i].card = oneTo36[i];
 		std::cout << cardlist[i].card << " ";
@@ -469,6 +502,7 @@ int main( int argc, char* args[] )
 			bool quit = false;
 			int boardselected = -1;
 			int cardselected = -1;
+			int bingolines = -1;
 			// mouse position
 			int mx, my;
 
@@ -507,24 +541,36 @@ int main( int argc, char* args[] )
 							 && my >= bstart.y && my <= bstart.y+bstart.h){
 								page = 1;// change this!!!!
 							}
-							for (int i = 0; i < 6; i++){// select bingo board
-								if (mx >= bingooutline[i].x && mx <= bingooutline[i].x+bingooutline[i].w 
-							 	  && my >= bingooutline[i].y && my <= bingooutline[i].y+bingooutline[i].h){
-									boardselected = i;
+							else{
+								for (int i = 0; i < 6; i++){// select bingo board
+									if (mx >= bingooutline[i].x && mx <= bingooutline[i].x+bingooutline[i].w && page == 1
+									&& my >= bingooutline[i].y && my <= bingooutline[i].y+bingooutline[i].h){
+										boardselected = i;
+										std::cout << "Selected bingo board: " << boardselected << std::endl;
+									}
 								}
 							}
 							if (mx >= bnext.x && mx <= bnext.x+bnext.w 
 							 && my >= bnext.y && my <= bnext.y+bnext.h){// next button work iff
-								if (boardselected != -1)// bingo board selected
+								if (boardselected != -1 && page == 1)// bingo board selected
 									page = 2;
-								if (cardselected == 14)// selected 15 cards
+								if (cardselected == 14 && page == 2)// selected 15 cards
 									page = 3;
+								if (bingolines != -1 && page == 3)
+									quit = true;
 							}
 							for (int i = 0; i < 6; i++){
 								for (int j = 0; j < 6; j++){
 									if (mx >= SCREEN_WIDTH/2+80*(i-3) && mx <= SCREEN_WIDTH/2+80*(i-3)+cards[36].getWidth()/2 && page == 2
 									 && my >= 50+titleTexture.getHeight()+100*j && my <= 50+titleTexture.getHeight()+100*j+cards[36].getHeight()/2){
-										if (cardselected < 14){
+										bool repeat = false;
+										for (int k = 0; k <= cardselected+1; k++){// detect repeat coord.
+											if (cardlist[k].getx() == i && cardlist[k].gety() == j){
+												repeat = true;
+												break;
+											}
+										}
+										if (!repeat && cardselected < 14){
 											cardselected++;
 											cardlist[cardselected].setcoord(i,j);
 											std::cout << cardselected+1 << " " << i << " " << j << std::endl;
@@ -651,7 +697,12 @@ int main( int argc, char* args[] )
 						}
 						if (cardselected == 14){// 15(0~14) cards selected show next button 
 							bnext = {SCREEN_WIDTH*85/100, SCREEN_HEIGHT*8/10, 150, 50};
-							SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+							SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );SDL_RenderDrawRect( gRenderer, &bnext);
+							if (!nextbutton.loadFromRenderedText( "Next", textColor, gFont)){// if text successfully loaded
+								SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+								SDL_RenderFillRect( gRenderer, NULL );
+							}
+							nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
 							SDL_RenderDrawRect( gRenderer, &bnext);
 							if (!nextbutton.loadFromRenderedText( "Next", textColor, gFont)){// if text successfully loaded
 								SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
@@ -659,6 +710,36 @@ int main( int argc, char* args[] )
 							}
 							nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
 						}
+						break;
+					case 3:
+						if (bingolines == -1){
+							bingolines = bingo(cardlist,positionSequence[boardselected]);
+						}
+						titleTexture.loadFromRenderedText("Bingo Time!", textColor ,gFont);
+						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
+						std::string resulttext = "Result: " + std::to_string(bingolines) +  " line(s)";
+						gPromptTextTexture.loadFromRenderedText(resulttext, textColor ,gFont);
+						gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, SCREEN_HEIGHT - gPromptTextTexture.getHeight()*1.5 );
+						for (int i = 0; i < 6; i++){// render 6x6 back cards
+							for (int j = 0; j < 6; j++){
+								cards[positionSequence[boardselected][i*6+j]].scaledrender(SCREEN_WIDTH/2+80*(j-3),50+titleTexture.getHeight()+95*i, 0.5);
+								for (int k = 0; k < 15; k++){
+									if (cardlist[k].card == positionSequence[boardselected][i*6+j]){
+										SDL_Rect bingorect = {SCREEN_WIDTH/2+80*(i-3)-5,50+titleTexture.getHeight()+95*j-5,cards[0].getWidth()/2+10,cards[0].getHeight()/2+10};
+										SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+										SDL_RenderDrawRect( gRenderer, &bingorect);
+									}
+								}
+							}
+						}
+						bnext = {SCREEN_WIDTH*85/100, SCREEN_HEIGHT*8/10, 150, 50};// actually exit button
+						SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
+						SDL_RenderDrawRect( gRenderer, &bnext);
+							if (!nextbutton.loadFromRenderedText( "Exit", textColor, gFont)){// if text successfully loaded
+								SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+								SDL_RenderFillRect( gRenderer, NULL );
+							}
+						nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
 						break;
 				}
 				//Update screen
