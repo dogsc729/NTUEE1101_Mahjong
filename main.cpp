@@ -761,6 +761,20 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect( gRenderer, NULL );
 							}
 						nextbutton.render(bnext.x+(bnext.w-nextbutton.getWidth())/2, bnext.y+(bnext.h-nextbutton.getHeight())/2);
+						LTexture usertexture, usernametexture,historytexture,linetexture;
+						std::string usertext = "User";
+						std::string usernametext = ": " + player.get_username();
+						std::string historytext = "History";
+						std::string linetext = ": " + std::to_string(player.get_userlines());
+						SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
+						usertexture.loadFromRenderedText(usertext,textColor ,gFont);
+						usernametexture.loadFromRenderedText(usernametext,textColor ,gFont);
+						usertexture.render(SCREEN_WIDTH*0.8-usertexture.getWidth()/2,SCREEN_HEIGHT*0.3);
+						usernametexture.render(SCREEN_WIDTH*0.8+usertexture.getWidth()/2,SCREEN_HEIGHT*0.3);
+						historytexture.loadFromRenderedText(historytext,textColor ,gFont);
+						linetexture.loadFromRenderedText(linetext,textColor ,gFont);
+						historytexture.render(SCREEN_WIDTH*0.8-historytexture.getWidth()/2,SCREEN_HEIGHT*0.5);
+						linetexture.render(SCREEN_WIDTH*0.8+historytexture.getWidth()/2,SCREEN_HEIGHT*0.5);
 						break;
 				}
 				//Update screen
