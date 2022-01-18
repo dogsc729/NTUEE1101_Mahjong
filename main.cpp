@@ -76,10 +76,10 @@ class LTexture
 		//Loads image at specified path
 		bool loadFromFile( std::string path ){
             free();
-            
+
             SDL_Texture* newTexture = NULL;
             SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-            
+
             if( loadedSurface == NULL ){
 		        printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
 	        }else{
@@ -104,7 +104,7 @@ class LTexture
             mTexture = newTexture;
             return mTexture != NULL;
         };
-		
+
         #if defined(SDL_TTF_MAJOR_VERSION)
         //Creates image from font string
         bool loadFromRenderedText( std::string textureText, SDL_Color textColor, TTF_Font* input_font = gFont){
@@ -136,7 +136,7 @@ class LTexture
                 printf( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
             }
 
-            
+
             //Return success
             return mTexture != NULL;
         };
@@ -166,7 +166,7 @@ class LTexture
         void setAlpha( Uint8 alpha ){
             SDL_SetTextureAlphaMod(mTexture, alpha);
         };
-        
+
         //Renders texture at given point
         void render( int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE ){
             //Set rendering space and render to screen
@@ -192,7 +192,7 @@ class LTexture
         int getWidth(){
             return mWidth;
         };
-        
+
         int getHeight(){
             return mHeight;
         };
@@ -324,7 +324,7 @@ void close(){
 	gFont = NULL;
     TTF_CloseFont(titleFont);
     titleFont = NULL;
-	//Destroy window	
+	//Destroy window
 	SDL_DestroyRenderer( gRenderer );
 	SDL_DestroyWindow( gWindow );
 	gWindow = NULL;
@@ -374,6 +374,7 @@ void loadcards(){
 	cards[34].loadFromFile("majhongcard/flower/flower_1.png");
 	cards[35].loadFromFile("majhongcard/flower/flower_2.png");
 	cards[36].loadFromFile("majhongcard/back.png");
+	cards[37].loadFromFile("majhongcard/checked.png");
 }
 class selectcard// class contain selectcard's coord. and card type
 {
@@ -437,11 +438,10 @@ int main( int argc, char* args[] )
     for(int i = 0; i < 6; i++){
         std::vector<int> pickedIndex(36,0);
         for(int j = 0; j < 36; j++){
-            do{
-                index = rand() % 36;
-            } while (pickedIndex[index] != 0);
+            do{index = rand() % 36;}
+            while (pickedIndex[index] != 0);
             pickedIndex[index] = 1;
-            positionSequence[i][j] = oneTo36[index]; 
+            positionSequence[i][j] = oneTo36[index];
 			std::cout << positionSequence[i][j] << " ";
 	    }std::cout << std::endl;
 	}
@@ -449,7 +449,7 @@ int main( int argc, char* args[] )
 		index = rand() % 36;
 		std::swap(oneTo36[i],oneTo36[index]);
 	}
-	std::cout << "Selected cards: ";
+	std::cout << "Selected cards: \n";
 	for (int i = 0; i < 15; i++){
 		cardlist[i].card = oneTo36[i];
 		std::cout << cardlist[i].card << " ";
@@ -462,7 +462,7 @@ int main( int argc, char* args[] )
 		printf( "Failed to initialize!\n" );
 	}
 	else
-	{   
+	{
         //create user object
         User player;
 		//Load media
@@ -472,7 +472,7 @@ int main( int argc, char* args[] )
 			printf( "Failed to load media!\n" );
 		}
 		else
-		{	
+		{
 			//Main loop flag
 			bool quit = false;
 			int boardselected = -1;
@@ -512,7 +512,7 @@ int main( int argc, char* args[] )
 					if (e.type == SDL_MOUSEBUTTONDOWN)
 					{
 						if (e.button.button == SDL_BUTTON_LEFT){// left click
-							if (mx >= bstart.x && mx <= bstart.x+bstart.w 
+							if (mx >= bstart.x && mx <= bstart.x+bstart.w
 							 && my >= bstart.y && my <= bstart.y+bstart.h){
 								page = 1;// change this!!!!
 							}
@@ -525,7 +525,7 @@ int main( int argc, char* args[] )
 									}
 								}
 							}
-							if (mx >= bnext.x && mx <= bnext.x+bnext.w 
+							if (mx >= bnext.x && mx <= bnext.x+bnext.w
 							 && my >= bnext.y && my <= bnext.y+bnext.h){// next button work iff
 								if (boardselected != -1 && page == 1)// bingo board selected
 									page = 2;
@@ -625,7 +625,7 @@ int main( int argc, char* args[] )
 						// outline
 						SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );
 						SDL_RenderDrawRect( gRenderer, &bstart );
-						
+
 						if (!startbutton.loadFromRenderedText( "Start", textColor, gFont)){// if text successfully loaded
 							SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
 							SDL_RenderFillRect( gRenderer, NULL );
@@ -671,7 +671,7 @@ int main( int argc, char* args[] )
 						for (int i = 0; i <= cardselected; i++){// show selected card
 							cards[cardlist[i].card].scaledrender(SCREEN_WIDTH/2+80*(cardlist[i].getx()-3),50+titleTexture.getHeight()+100*cardlist[i].gety(), 0.5);
 						}
-						if (cardselected == 14){// 15(0~14) cards selected show next button 
+						if (cardselected == 14){// 15(0~14) cards selected show next button
 							bnext = {SCREEN_WIDTH*85/100, SCREEN_HEIGHT*8/10, 150, 50};
 							SDL_SetRenderDrawColor( gRenderer, 0x00, 0x00, 0x00, 0x00 );SDL_RenderDrawRect( gRenderer, &bnext);
 							if (!nextbutton.loadFromRenderedText( "Next", textColor, gFont)){// if text successfully loaded
@@ -698,12 +698,13 @@ int main( int argc, char* args[] )
 						gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, SCREEN_HEIGHT - gPromptTextTexture.getHeight()*1.5 );
 						for (int i = 0; i < 6; i++){// render 6x6 back cards
 							for (int j = 0; j < 6; j++){
-								cards[positionSequence[boardselected][i*6+j]].scaledrender(SCREEN_WIDTH/2+80*(j-3),50+titleTexture.getHeight()+95*i, 0.5);
+								cards[positionSequence[boardselected][i*6+j]].scaledrender(SCREEN_WIDTH/2+80*(i-3)+2.5,50+titleTexture.getHeight()+95*j+2.5, 0.5);
 								for (int k = 0; k < 15; k++){
 									if (cardlist[k].card == positionSequence[boardselected][i*6+j]){
-										SDL_Rect bingorect = {SCREEN_WIDTH/2+80*(i-3)-5,50+titleTexture.getHeight()+95*j-5,cards[0].getWidth()/2+10,cards[0].getHeight()/2+10};
+										SDL_Rect bingorect = {SCREEN_WIDTH/2+80*(i-3),50+titleTexture.getHeight()+95*j,cards[0].getWidth()/2+5,cards[0].getHeight()/2+5};
 										SDL_SetRenderDrawColor( gRenderer, 0xFF, 0x00, 0x00, 0x00 );
 										SDL_RenderDrawRect( gRenderer, &bingorect);
+										cards[37].scaledrender(SCREEN_WIDTH/2+80*(i-3),50+titleTexture.getHeight()+95*j, 0.05);
 									}
 								}
 							}
@@ -721,7 +722,7 @@ int main( int argc, char* args[] )
 				//Update screen
 				SDL_RenderPresent( gRenderer );
 			}
-			
+
 			//Disable text input
 			SDL_StopTextInput();
 		}
