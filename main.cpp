@@ -8,6 +8,7 @@
 #include "stdlib.h"
 #include "iostream"
 #include "time.h"
+#include "fstream"
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 1280;
@@ -210,21 +211,40 @@ class LTexture
 LTexture titleTexture;
 LTexture gPromptTextTexture;
 LTexture gInputTextTexture;
+LTexture gInputpwdTextTexture;
 LTexture startbutton;
 LTexture nextbutton;
 LTexture cards[37];
 //user info
 class User{
     public:
-        User(){};
+        User(){
+			user_name = "default";
+			file_path = "C:\\";
+			lines = 0;
+		};
         std::string get_username(){
             return user_name;
         };
+		int get_userlines(){
+			return lines;
+		}
+		std::string get_userFilePath(){
+			return file_path;
+		}
         void set_username(std::string input_name){
             user_name = input_name;
         }
+		void set_userlines(int line){
+			lines = line;
+		}
+		void set_userFilePath(std::string input){
+			file_path = input;
+		}
     private:
         std::string user_name;
+		std::string file_path;
+		int lines;
 };
 
 //Starts up SDL and creates window
@@ -423,9 +443,15 @@ int bingo(std::vector<selectcard> card, std::vector<int> bingoboard){
 	std::cout << "bingo: " << count << std::endl;
 	return count;
 }
+bool exists_test0 (const std::string& name){
+	std::fstream f(name.c_str());
+	std::cout << name << std::endl; 
+	return f.good();
+};
 int main( int argc, char* args[] )
 {
 	int page = 0;
+	int new_lines = 0;
 	SDL_Rect bstart,bnext;
 	SDL_Rect bingooutline[6];
 	srand(time(NULL));
@@ -514,6 +540,23 @@ int main( int argc, char* args[] )
 						if (e.button.button == SDL_BUTTON_LEFT){// left click
 							if (mx >= bstart.x && mx <= bstart.x+bstart.w
 							 && my >= bstart.y && my <= bstart.y+bstart.h){
+								std::cout << inputText << std::endl;
+								std::string accumulateLines = ".\\users\\" +inputText + "_lines.txt";
+								std::ifstream input(accumulateLines);
+								std::string line_string;
+								int line_int;
+								player.set_username(inputText);
+								if(input.is_open()){
+									getline(input, line_string);
+									line_int = std::stoi(line_string);
+									std::cout << line_int << std::endl;
+									player.set_userlines(line_int);
+									player.set_userFilePath(accumulateLines);
+									input.close();
+								}else{
+									player.set_userlines(0);
+									player.set_userFilePath(accumulateLines);
+								}
 								page = 1;// change this!!!!
 							}
 							else{
@@ -694,6 +737,7 @@ int main( int argc, char* args[] )
 						titleTexture.loadFromRenderedText("Bingo Time!", textColor ,gFont);
 						titleTexture.render(( SCREEN_WIDTH - titleTexture.getWidth() ) / 2, 0);
 						std::string resulttext = "Result: " + std::to_string(bingolines) +  " line(s)";
+						new_lines = bingolines;
 						gPromptTextTexture.loadFromRenderedText(resulttext, textColor ,gFont);
 						gPromptTextTexture.render( ( SCREEN_WIDTH - gPromptTextTexture.getWidth() ) / 2, SCREEN_HEIGHT - gPromptTextTexture.getHeight()*1.5 );
 						for (int i = 0; i < 6; i++){// render 6x6 back cards
@@ -726,8 +770,16 @@ int main( int argc, char* args[] )
 			//Disable text input
 			SDL_StopTextInput();
 		}
+		player.set_userlines(new_lines + player.get_userlines());
+		int lines_afer_addition = player.get_userlines();
+		std::ofstream ofs;
+		std::cout << player.get_userFilePath() << std::endl;
+		ofs.open(player.get_userFilePath(), std::ofstream::trunc);
+		if(ofs.is_open()){
+			ofs << player.get_userlines();
+			ofs.close();
+		}
 	}
-
 	//Free resources and close SDL
 	close();
 
