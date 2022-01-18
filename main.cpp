@@ -67,12 +67,12 @@ class LTexture
             mTexture = NULL;
             mWidth = 0;
             mHeight = 0;
-        };
+        }
 
 		//Deallocates memory
 		~LTexture(){
             free();
-        };
+        }
 
 		//Loads image at specified path
 		bool loadFromFile( std::string path ){
@@ -84,9 +84,6 @@ class LTexture
             if( loadedSurface == NULL ){
 		        printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
 	        }else{
-                //Color key image
-                SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, 0, 0xFF, 0xFF ) );
-
                 //Create texture from surface pixels
                 newTexture = SDL_CreateTextureFromSurface( gRenderer, loadedSurface );
                 if( newTexture == NULL ){
@@ -104,7 +101,7 @@ class LTexture
             //Return success
             mTexture = newTexture;
             return mTexture != NULL;
-        };
+        }
 
         #if defined(SDL_TTF_MAJOR_VERSION)
         //Creates image from font string
@@ -140,7 +137,7 @@ class LTexture
 
             //Return success
             return mTexture != NULL;
-        };
+        }
         #endif
 
         //Deallocates texture
@@ -151,22 +148,7 @@ class LTexture
                 mWidth = 0;
                 mHeight = 0;
             }
-        };
-
-        //Set color modulation
-        void setColor( Uint8 red, Uint8 green, Uint8 blue ){
-            SDL_SetTextureColorMod(mTexture, red, green, blue);
-        };
-
-        //Set blending
-        void setBlendMode( SDL_BlendMode blending ){
-            SDL_SetTextureBlendMode(mTexture, blending);
-        };
-
-        //Set alpha modulation
-        void setAlpha( Uint8 alpha ){
-            SDL_SetTextureAlphaMod(mTexture, alpha);
-        };
+        }
 
         //Renders texture at given point
         void render( int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE ){
@@ -182,7 +164,7 @@ class LTexture
 
             //Render to screen
             SDL_RenderCopyEx( gRenderer, mTexture, clip, &renderQuad, angle, center, flip );
-        };
+        }
 		void scaledrender(int x, int y, double ratio){
 			int scaledw = int(ratio * mWidth);
 			int scaledh = int(ratio * mHeight);
@@ -192,11 +174,11 @@ class LTexture
         //Gets image dimensions
         int getWidth(){
             return mWidth;
-        };
+        }
 
         int getHeight(){
             return mHeight;
-        };
+        }
 
 	private:
 		//The actual hardware texture
@@ -538,7 +520,7 @@ int main( int argc, char* args[] )
 					if (e.type == SDL_MOUSEBUTTONDOWN)
 					{
 						if (e.button.button == SDL_BUTTON_LEFT){// left click
-							if (mx >= bstart.x && mx <= bstart.x+bstart.w
+							if (mx >= bstart.x && mx <= bstart.x+bstart.w && page == 0
 							 && my >= bstart.y && my <= bstart.y+bstart.h){
 								std::cout << inputText << std::endl;
 								std::string accumulateLines = ".\\users\\" +inputText + "_lines.txt";
