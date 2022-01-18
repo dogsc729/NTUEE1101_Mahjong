@@ -14,6 +14,7 @@ const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 
 SDL_Window* gWindow = NULL;
+//windows icon
 Uint16 pixels[64*64] = {
 	0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
     0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff, 0x0fff,
@@ -55,30 +56,6 @@ SDL_Renderer* gRenderer = NULL;
 //Globally used font
 TTF_Font* gFont = NULL;
 TTF_Font* titleFont = NULL;
-
-std::vector<std::vector<int>> bingoBoard(){
-	std::vector<std::vector<int>> positionSequence(6,std::vector<int>(36,0));
-	std::vector<int> pickedIndex(36,0);
-	std::vector<int> oneTo36(36,0);
-	for(int i = 0; i < 6; i++){
-		for(int j = 0; j < 36; j++)
-			oneTo36[j] = j;
-		int size = 36;
-		int index;
-		for(int j = 0; j < 36; j++){
-			do{
-				index = rand() % 36;
-			} while (pickedIndex[index] != 0);
-			pickedIndex[index] = 1;
-			positionSequence[i][j] = oneTo36[index]; 
-		}
-	}
-	for(int i = 0; i < 6; i++){
-		for(int j = 0; j < 36; j++)
-			std::cout << positionSequence[i][j] << " ";
-	}
-	return positionSequence;
-};
 
 class LTexture
 {
@@ -324,18 +301,15 @@ bool loginPage(){
 	else{
 		//Render the prompt
 		SDL_Color textColor = { 0, 0, 0, 0xFF };
-        if( !titleTexture.loadFromRenderedText( "MAJHONG", textColor , titleFont) )
-		{
+        if( !titleTexture.loadFromRenderedText( "MAJHONG", textColor , titleFont) ){
 			printf( "Failed to render prompt text!\n" );
 			success = false;
 		}
-		if( !gPromptTextTexture.loadFromRenderedText( "Enter User Name(English):", textColor ,gFont) )
-		{
+		if( !gPromptTextTexture.loadFromRenderedText( "Enter User Name(English):", textColor ,gFont) ){
 			printf( "Failed to render prompt text!\n" );
 			success = false;
 		}
 	}
-
 	return success;
 };
 
@@ -425,6 +399,7 @@ int bingo(std::vector<selectcard> card, std::vector<int> bingoboard){
 			}
 		}
 	}
+	//judge the number of lines of bingos
 	for (int i = 0; i < 6; i++){
 		if (onboard[i*6] && onboard[i*6+1] && onboard[i*6+2] && onboard[i*6+3] && onboard[i*6+4] && onboard[i*6+5]){
 			std::cout << i << " row bingo" << std::endl;
@@ -470,7 +445,7 @@ int main( int argc, char* args[] )
 			std::cout << positionSequence[i][j] << " ";
 	    }std::cout << std::endl;
 	}
-	for (int i = 35; i > 0; i--){// random selectcard
+	for (int i = 35; i > 0; i--){// random select card
 		index = rand() % 36;
 		std::swap(oneTo36[i],oneTo36[index]);
 	}
@@ -559,6 +534,7 @@ int main( int argc, char* args[] )
 								if (bingolines != -1 && page == 3)
 									quit = true;
 							}
+							//select 15 cards
 							for (int i = 0; i < 6; i++){
 								for (int j = 0; j < 6; j++){
 									if (mx >= SCREEN_WIDTH/2+80*(i-3) && mx <= SCREEN_WIDTH/2+80*(i-3)+cards[36].getWidth()/2 && page == 2
@@ -580,7 +556,7 @@ int main( int argc, char* args[] )
 							}
 						}
 					}
-					//Special key input
+					//Special key input(keyboard)
 					else if( e.type == SDL_KEYDOWN )
 					{
 						//Handle backspace
