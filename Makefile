@@ -19,7 +19,7 @@ COMPILER_FLAGS = #-w -Wl,-subsystem,windows
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 
 #OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = majong
+OBJ_NAME = bin\mahjong
 
 #This is the target that compiles our executable
 all : $(OBJS)
